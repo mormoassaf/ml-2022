@@ -27,21 +27,17 @@ class SiameseNetwork(nn.Module):
             nn.Dropout2d(p=0.3),
         )
 
-        # Defining the fully connected layers
+        # Defining the fully connected layers using convolutional layers of N neurons
         self.fc1 = nn.Sequential(
-            nn.Linear(30976, 1024),
+            nn.Conv2d(256, 1024, kernel_size=1, stride=1),
             nn.ReLU(inplace=True),
             nn.Dropout2d(p=0.5),
-
-            nn.Linear(1024, 128),
-            nn.ReLU(inplace=True),
-
-            nn.Linear(128, 2))
+            nn.Conv2d(1024, 1024, kernel_size=5, stride=1),
+        )
 
     def forward_once(self, x):
         # Forward pass
         output = self.cnn1(x)
-        output = output.view(output.size()[0], -1)
         output = self.fc1(output)
         return output
 
