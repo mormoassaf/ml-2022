@@ -1,21 +1,21 @@
 import torch
 import torch.nn.functional as F
 
-# Taken from https://www.kaggle.com/code/robinreni/signature-classification-using-siamese-pytorch
+# Taken from https://gist.github.com/kongzii/0a108b115179cc17d58c158a94465a3c
 class ContrastiveLoss(torch.nn.Module):
+  def __init__(self, m=2.0):
+    super(ContrastiveLoss, self).__init__()  # pre 3.3 syntax
+    self.m = m  # margin or radius
+
+  def forward(x1, x2, label, margin: float = 1.0):
     """
-    Contrastive loss function.
-    Based on: http://yann.lecun.com/exdb/publis/pdf/hadsell-chopra-lecun-06.pdf
+    Computes Contrastive Loss
     """
 
-    def __init__(self, margin=2.0):
-        super(ContrastiveLoss, self).__init__()
-        self.margin = margin
+    dist = torch.nn.functional.pairwise_distance(x1, x2)
 
-    def forward(self, output1, output2, label):
-        euclidean_distance = F.pairwise_distance(output1, output2)
-        loss_contrastive = torch.mean((1-label) * torch.pow(euclidean_distance, 2) +
-                                      (label) * torch.pow(torch.clamp(self.margin - euclidean_distance, min=0.0), 2))
+    loss = (1 - label) * torch.pow(dist, 2) \
+        + (label) * torch.pow(torch.clamp(margin - dist, min=0.0), 2)
+    loss = torch.mean(loss)
 
-
-        return loss_contrastive
+    return loss

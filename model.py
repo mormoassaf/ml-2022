@@ -33,6 +33,7 @@ class SiameseNetwork(nn.Module):
             nn.ReLU(inplace=True),
             nn.Dropout2d(p=0.5),
             nn.Conv2d(1024, 1024, kernel_size=5, stride=1),
+            nn.Flatten(),
         )
 
     def forward_once(self, x):
@@ -47,3 +48,12 @@ class SiameseNetwork(nn.Module):
         # forward pass of input 2
         output2 = self.forward_once(input2)
         return output1, output2
+
+    def predict(self, input1, input2):
+        # forward pass of input 1
+        output1 = self.forward_once(input1)
+        # forward pass of input 2
+        output2 = self.forward_once(input2)
+        # similarity between the 2 outputs
+        similarity = nn.CosineSimilarity(dim=1, eps=1e-6)(output1, output2)
+        return similarity
