@@ -1,4 +1,6 @@
 from torch import nn
+import torch
+import torch.nn.functional as F
 
 # Taken from https://www.kaggle.com/code/robinreni/signature-classification-using-siamese-pytorch
 class SiameseNetwork(nn.Module):
@@ -36,6 +38,19 @@ class SiameseNetwork(nn.Module):
             nn.Flatten(),
         )
 
+        self.fc2 = nn.Sequential(
+            nn.Linear(1024*2, 128),
+            nn.ReLU(inplace=True),
+            nn.Dropout(p=0.5),
+            nn.Linear(128, 1),
+            nn.Softmax(dim=1)
+        )
+
+        # self.compare_embeddings = nn.CosineSimilarity(dim=1, eps=1e-6)
+    
+    def compare_embeddings(self, embedding1, embedding2):
+        return F.pairwise_distance(embedding1, embedding2)
+
     def forward_once(self, x):
         # Forward pass
         output = self.cnn1(x)
@@ -48,6 +63,10 @@ class SiameseNetwork(nn.Module):
         # forward pass of input 2
         output2 = self.forward_once(input2)
         return output1, output2
+        # output = torch.concat((output1, output2), 1)
+        # output = self.fc2(output).squeeze()
+        # return output
+
 
     def predict(self, input1, input2):
         # forward pass of input 1
@@ -55,5 +74,4 @@ class SiameseNetwork(nn.Module):
         # forward pass of input 2
         output2 = self.forward_once(input2)
         # similarity between the 2 outputs
-        similarity = nn.CosineSimilarity(dim=1, eps=1e-6)(output1, output2)
-        return similarity
+        return self.compare_embeddings(output1, output2)
