@@ -67,7 +67,6 @@ class SiameseNetwork(nn.Module):
         # output = self.fc2(output).squeeze()
         # return output
 
-
     def predict(self, input1, input2):
         # forward pass of input 1
         output1 = self.forward_once(input1)
