@@ -2,7 +2,9 @@ from torch import nn
 import torch
 import torch.nn.functional as F
 
-# Taken from https://www.kaggle.com/code/robinreni/signature-classification-using-siamese-pytorch
+# References used:
+# https://www.kaggle.com/code/robinreni/signature-classification-using-siamese-pytorch
+# https://github.com/harveyslash/Facial-Similarity-with-Siamese-Networks-in-Pytorch/blob/master/Siamese-networks-medium.ipynb
 class SiameseNetwork(nn.Module):
 
     def __init__(self):
@@ -38,16 +40,8 @@ class SiameseNetwork(nn.Module):
             nn.Flatten(),
         )
 
-        self.fc2 = nn.Sequential(
-            nn.Linear(1024*2, 128),
-            nn.ReLU(inplace=True),
-            nn.Dropout(p=0.5),
-            nn.Linear(128, 1),
-            nn.Softmax(dim=1)
-        )
-
-        # self.compare_embeddings = nn.CosineSimilarity(dim=1, eps=1e-6)
     
+    # Retrieve the distance between the 2 embeddings
     def compare_embeddings(self, embedding1, embedding2):
         return F.pairwise_distance(embedding1, embedding2)
 
